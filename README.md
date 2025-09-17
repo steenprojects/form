@@ -1,1 +1,683 @@
 # form
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Form with Webhook Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .config-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .payload-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .payload-info h4 {
+            margin-bottom: 8px;
+            color: #b45309;
+        }
+
+        .payload-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .status.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .status.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .status.info {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.2);
+        }
+
+        .payload-preview {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .toggle-button {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+            margin: 10px auto;
+            display: block;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .size-indicator {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .size-warning {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 JWT Form to Webhook</h1>
+        
+        <form id="dataForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="company">Company / Organization</label>
+                <input type="text" id="company" name="company">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department">
+                        <option value="">Select Department</option>
+                        <option value="sales">Sales</option>
+                        <option value="support">Support</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="technical">Technical</option>
+                        <option value="billing">Billing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priority Level</label>
+                    <select id="priority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject *</label>
+                <input type="text" id="subject" name="subject" required 
+                       placeholder="Brief description of your inquiry">
+            </div>
+
+            <div class="form-group">
+                <label for="message">Detailed Message *</label>
+                <textarea id="message" name="message" required 
+                          placeholder="Please provide detailed information about your request..."></textarea>
+                <div class="size-indicator" id="messageSize">0 characters</div>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Tags (comma-separated)</label>
+                <input type="text" id="tags" name="tags" 
+                       placeholder="feature-request, bug-report, question">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="budget">Budget Range</label>
+                    <select id="budget" name="budget">
+                        <option value="">Not specified</option>
+                        <option value="under-1k">Under $1,000</option>
+                        <option value="1k-5k">$1,000 - $5,000</option>
+                        <option value="5k-10k">$5,000 - $10,000</option>
+                        <option value="10k-25k">$10,000 - $25,000</option>
+                        <option value="25k-plus">$25,000+</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="timeline">Expected Timeline</label>
+                    <select id="timeline" name="timeline">
+                        <option value="">Not specified</option>
+                        <option value="asap">ASAP</option>
+                        <option value="1-week">Within 1 week</option>
+                        <option value="1-month">Within 1 month</option>
+                        <option value="3-months">Within 3 months</option>
+                        <option value="flexible">Flexible</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3>⚙️ Webhook & JWT Configuration</h3>
+                
+                <div class="form-group">
+                    <label for="webhookUrl">n8n Webhook URL *</label>
+                    <input type="url" id="webhookUrl" name="webhookUrl" 
+                           placeholder="https://your-n8n.app/webhook/your-webhook-id" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jwtSecret">JWT Secret Key *</label>
+                        <input type="password" id="jwtSecret" name="jwtSecret" 
+                               placeholder="your-secret-key-min-32-chars" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jwtIssuer">JWT Issuer</label>
+                        <input type="text" id="jwtIssuer" name="jwtIssuer" 
+                               placeholder="customer-form" value="customer-form">
+                    </div>
+                </div>
+
+                <div class="payload-info">
+                    <h4>📊 Payload Size Limits:</h4>
+                    <ul>
+                        <li><strong>JWT Token:</strong> ~8KB typical limit (depends on server)</li>
+                        <li><strong>n8n Webhook:</strong> ~1MB payload limit</li>
+                        <li><strong>HTTP Headers:</strong> ~8KB limit (for Authorization header)</li>
+                        <li><strong>Recommendation:</strong> Keep form data under 4KB for reliability</li>
+                    </ul>
+                    <div id="payloadSizeInfo" style="margin-top: 10px; font-weight: bold;">
+                        Current payload size: <span id="currentSize">0 bytes</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                🚀 Generate JWT & Send to Webhook
+            </button>
+        </form>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button type="button" class="toggle-button" id="togglePreview">
+                👁️ Show JWT & Payload Preview
+            </button>
+            <div id="previewSection" class="hidden">
+                <div style="margin: 10px 0; font-weight: bold;">JWT Token:</div>
+                <div id="jwtPreview" class="payload-preview"></div>
+                <div style="margin: 10px 0; font-weight: bold;">Decoded Payload:</div>
+                <div id="payloadPreview" class="payload-preview"></div>
+            </div>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <!-- JWT Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <script>
+        // Simple JWT implementation using CryptoJS
+        function base64UrlEncode(str) {
+            return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(str))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        function createJWT(payload, secret, issuer = 'form-app') {
+            // JWT Header
+            const header = {
+                alg: 'HS256',
+                typ: 'JWT'
+            };
+
+            // JWT Payload with standard claims
+            const now = Math.floor(Date.now() / 1000);
+            const jwtPayload = {
+                ...payload,
+                iss: issuer,
+                iat: now,
+                exp: now + 3600, // 1 hour expiration
+                jti: generateId() // Unique token ID
+            };
+
+            // Encode header and payload
+            const encodedHeader = base64UrlEncode(JSON.stringify(header));
+            const encodedPayload = base64UrlEncode(JSON.stringify(jwtPayload));
+
+            // Create signature
+            const signature = CryptoJS.HmacSHA256(
+                encodedHeader + '.' + encodedPayload, 
+                secret
+            );
+            const encodedSignature = CryptoJS.enc.Base64.stringify(signature)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+
+            return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substring(2) + Date.now().toString(36);
+        }
+
+        function calculatePayloadSize(data) {
+            return new Blob([JSON.stringify(data)]).size;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 bytes';
+            const k = 1024;
+            const sizes = ['bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, type === 'error' ? 10000 : 5000);
+        }
+
+        function collectFormData() {
+            const form = document.getElementById('dataForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Config fields to exclude from payload
+            const configFields = ['webhookUrl', 'jwtSecret', 'jwtIssuer'];
+            
+            for (let [key, value] of formData.entries()) {
+                if (!configFields.includes(key) && value.trim() !== '') {
+                    data[key] = value.trim();
+                }
+            }
+            
+            // Add metadata
+            data.submissionId = generateId();
+            data.timestamp = new Date().toISOString();
+            data.userAgent = navigator.userAgent;
+            data.language = navigator.language;
+            data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            data.formVersion = '2.0';
+            
+            // Process tags
+            if (data.tags) {
+                data.tags = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            }
+            
+            return data;
+        }
+
+        async function sendToWebhook(jwt, payload, webhookUrl) {
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`,
+                        'X-JWT-Token': jwt,
+                        'X-Form-Source': 'jwt-form',
+                        'X-Payload-Size': calculatePayloadSize(payload).toString()
+                    },
+                    body: JSON.stringify({
+                        jwt: jwt,
+                        payload: payload,
+                        metadata: {
+                            submissionTime: new Date().toISOString(),
+                            payloadSize: calculatePayloadSize(payload),
+                            jwtSize: new Blob([jwt]).size
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    throw new Error(`Webhook error (${response.status}): ${errorText}`);
+                }
+
+                return await response.json().catch(() => ({ success: true }));
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error('Network error: Could not connect to webhook. Please check the URL.');
+                }
+                throw error;
+            }
+        }
+
+        function updatePayloadSize() {
+            try {
+                const data = collectFormData();
+                const size = calculatePayloadSize(data);
+                const sizeElement = document.getElementById('currentSize');
+                
+                sizeElement.textContent = formatBytes(size);
+                
+                // Warning for large payloads
+                if (size > 4096) { // 4KB
+                    sizeElement.className = 'size-warning';
+                    document.getElementById('payloadSizeInfo').innerHTML = 
+                        'Current payload size: <span class="size-warning">' + formatBytes(size) + ' (⚠️ Large payload)</span>';
+                } else {
+                    sizeElement.className = '';
+                    document.getElementById('payloadSizeInfo').innerHTML = 
+                        'Current payload size: <span id="currentSize">' + formatBytes(size) + '</span>';
+                }
+            } catch (error) {
+                // Ignore errors during size calculation
+            }
+        }
+
+        function updatePreview() {
+            try {
+                const webhookUrl = document.getElementById('webhookUrl').value;
+                const jwtSecret = document.getElementById('jwtSecret').value;
+                const jwtIssuer = document.getElementById('jwtIssuer').value;
+                
+                if (!jwtSecret) return;
+                
+                const data = collectFormData();
+                const jwt = createJWT(data, jwtSecret, jwtIssuer);
+                
+                document.getElementById('jwtPreview').textContent = jwt;
+                document.getElementById('payloadPreview').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('jwtPreview').textContent = 'Error generating preview: ' + error.message;
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('dataForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '🔄 Processing...';
+            submitBtn.disabled = true;
+
+            try {
+                // Get configuration
+                const webhookUrl = document.getElementById('webhookUrl').value;
+                const jwtSecret = document.getElementById('jwtSecret').value;
+                const jwtIssuer = document.getElementById('jwtIssuer').value || 'customer-form';
+
+                if (!webhookUrl || !jwtSecret) {
+                    throw new Error('Please provide webhook URL and JWT secret');
+                }
+
+                // Collect form data
+                const formData = collectFormData();
+                const payloadSize = calculatePayloadSize(formData);
+
+                // Check payload size
+                if (payloadSize > 6144) { // 6KB warning
+                    const proceed = confirm(`Payload is ${formatBytes(payloadSize)}. This might be too large for some systems. Continue?`);
+                    if (!proceed) {
+                        throw new Error('Submission cancelled due to large payload');
+                    }
+                }
+
+                showStatus('⏳ Creating JWT and sending to webhook...', 'info');
+
+                // Create JWT
+                const jwt = createJWT(formData, jwtSecret, jwtIssuer);
+                const jwtSize = new Blob([jwt]).size;
+
+                // Check JWT size
+                if (jwtSize > 7168) { // 7KB
+                    throw new Error(`JWT token is ${formatBytes(jwtSize)}, which exceeds typical header limits (8KB)`);
+                }
+
+                // Send to webhook
+                const response = await sendToWebhook(jwt, formData, webhookUrl);
+                
+                showStatus(`✅ Successfully sent to webhook!<br>
+                    <small>Payload: ${formatBytes(payloadSize)} | JWT: ${formatBytes(jwtSize)}</small>`, 'success');
+                
+                // Reset form (except config)
+                const formFields = ['firstName', 'lastName', 'email', 'phone', 'company', 
+                                  'department', 'subject', 'message', 'tags', 'budget', 'timeline'];
+                formFields.forEach(field => {
+                    const element = document.getElementById(field);
+                    if (element) element.value = '';
+                });
+                document.getElementById('priority').value = 'medium';
+
+                updatePayloadSize();
+
+            } catch (error) {
+                console.error('Submission Error:', error);
+                showStatus(`❌ ${error.message}`, 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Toggle preview
+        document.getElementById('togglePreview').addEventListener('click', () => {
+            const preview = document.getElementById('previewSection');
+            const button = document.getElementById('togglePreview');
+            
+            if (preview.classList.contains('hidden')) {
+                preview.classList.remove('hidden');
+                button.textContent = '🙈 Hide Preview';
+                updatePreview();
+            } else {
+                preview.classList.add('hidden');
+                button.textContent = '👁️ Show JWT & Payload Preview';
+            }
+        });
+
+        // Auto-save config fields
+        ['webhookUrl', 'jwtSecret', 'jwtIssuer'].forEach(field => {
+            const element = document.getElementById(field);
+            
+            // Load from session storage
+            const saved = sessionStorage.getItem(field);
+            if (saved) element.value = saved;
+            
+            // Save to session storage on change
+            element.addEventListener('change', () => {
+                sessionStorage.setItem(field, element.value);
+                updatePreview();
+            });
+        });
+
+        // Update size and preview on input
+        document.getElementById('dataForm').addEventListener('input', () => {
+            updatePayloadSize();
+            if (!document.getElementById('previewSection').classList.contains('hidden')) {
+                updatePreview();
+            }
+        });
+
+        // Message character counter
+        document.getElementById('message').addEventListener('input', (e) => {
+            const length = e.target.value.length;
+            const counter = document.getElementById('messageSize');
+            counter.textContent = `${length} characters`;
+            
+            if (length > 1000) {
+                counter.style.color = '#e74c3c';
+            } else {
+                counter.style.color = '#666';
+            }
+        });
+
+        // Initialize
+        updatePayloadSize();
+    </script>
+</body>
+</html>
